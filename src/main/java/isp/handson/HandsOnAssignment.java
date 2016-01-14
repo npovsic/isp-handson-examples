@@ -1,8 +1,8 @@
 package isp.handson;
 
+import javax.xml.bind.DatatypeConverter;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HandsOnAssignment {
@@ -19,7 +19,7 @@ public class HandsOnAssignment {
                 try {
                     final String message = "I love you Bob. Kisses, Alice.";
                     outgoing.put(message.getBytes("UTF-8"));
-                    LOG.info("[Alice]: Sending to Bob: " + message);
+                    System.out.printf("[Alice]: Sending to Bob: %s%n", message);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -31,8 +31,9 @@ public class HandsOnAssignment {
             @Override
             public void run() {
                 try {
-                    final String message = new String(incoming.take(), "UTF-8");
-                    LOG.log(Level.INFO, "[Bob]: I have received: " + message);
+                    final byte[] payload = incoming.take();
+                    final String message = new String(payload, "UTF-8");
+                    System.out.printf("[Bob]: I have received '%s' which in UTF-8 is '%s'%n", str(payload), message);
                 } catch (Exception ex) {
                 }
             }
@@ -40,5 +41,9 @@ public class HandsOnAssignment {
 
         bob.start();
         alice.start();
+    }
+
+    public static String str(final byte[] data) {
+        return DatatypeConverter.printHexBinary(data);
     }
 }
