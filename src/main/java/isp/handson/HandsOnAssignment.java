@@ -21,6 +21,7 @@ public class HandsOnAssignment {
                     outgoing.put(message.getBytes("UTF-8"));
                     System.out.printf("[Alice]: Sending to Bob: %s%n", message);
                 } catch (Exception e) {
+                    System.err.printf("[Alice] Exception: %s%n.", e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -34,7 +35,9 @@ public class HandsOnAssignment {
                     final byte[] payload = incoming.take();
                     final String message = new String(payload, "UTF-8");
                     System.out.printf("[Bob]: I have received '%s' which in UTF-8 is '%s'%n", str(payload), message);
-                } catch (Exception ex) {
+                } catch (Exception e) {
+                    System.err.printf("[Bob] Exception: %s%n.", e.getMessage());
+                    e.printStackTrace();
                 }
             }
         };
