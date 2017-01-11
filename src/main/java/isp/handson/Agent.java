@@ -60,8 +60,10 @@ public abstract class Agent extends Thread {
      * @param obj
      */
     public void print(String string, Object... obj) {
-        System.out.printf("[%s] ", getName());
-        System.out.printf(string, obj);
-        System.out.println();
+        synchronized (System.out) {
+            System.out.printf("[%s] ", getName());
+            System.out.printf(string, obj);
+            System.out.println();
+        }
     }
 }
