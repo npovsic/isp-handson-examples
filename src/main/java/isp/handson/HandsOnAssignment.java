@@ -6,40 +6,25 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class HandsOnAssignment {
     public static void main(String[] args) throws Exception {
 
-        final BlockingQueue<byte[]> alice2server = new LinkedBlockingQueue<>();
-        final BlockingQueue<byte[]> alice2lock = new LinkedBlockingQueue<>();
-        final BlockingQueue<byte[]> server2lock = new LinkedBlockingQueue<>();
+        final BlockingQueue<byte[]> alice2bob = new LinkedBlockingQueue<>();
+        final BlockingQueue<byte[]> bob2alice = new LinkedBlockingQueue<>();
 
-        final Agent alice = new Agent("alice", null, null, null, null) {
+        final Agent alice = new Agent("alice", alice2bob, bob2alice, null, null) {
             @Override
             public void execute() throws Exception {
-                alice2server.put("from Alice".getBytes());
-                alice2lock.put("from Alice".getBytes());
+                outgoing.put("Hi Bob, it's Alice!".getBytes());
             }
         };
 
-        final Agent server = new Agent("server", null, null, null, null) {
+        final Agent bob = new Agent("bob", bob2alice, alice2bob, null, null) {
             @Override
             public void execute() throws Exception {
-                server2lock.put("from Server".getBytes());
-                final byte[] msg = alice2server.take();
-                print("Got %s", new String(msg));
-            }
-        };
-
-        final Agent lock = new Agent("lock", null, null, null, null) {
-            @Override
-            public void execute() throws Exception {
-                final byte[] msg1 = alice2lock.take();
-                print("Got %s", new String(msg1));
-
-                final byte[] msg2 = server2lock.take();
-                print("Got %s", new String(msg2));
+                final byte[] pt = incoming.take();
+                print("Got '%s'", new String(pt));
             }
         };
 
         alice.start();
-        server.start();
-        lock.start();
+        bob.start();
     }
 }
