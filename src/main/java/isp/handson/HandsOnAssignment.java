@@ -1,30 +1,31 @@
 package isp.handson;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import fri.isp.Agent;
+import fri.isp.Environment;
+
+import java.nio.charset.StandardCharsets;
 
 public class HandsOnAssignment {
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
+        final Environment env = new Environment();
 
-        final BlockingQueue<byte[]> alice2bob = new LinkedBlockingQueue<>();
-        final BlockingQueue<byte[]> bob2alice = new LinkedBlockingQueue<>();
-
-        final Agent alice = new Agent("alice", alice2bob, bob2alice, null, null) {
+        env.add(new Agent("alice") {
             @Override
-            public void execute() throws Exception {
-                outgoing.put("Hi Bob, it's Alice!".getBytes());
+            public void task() throws Exception {
+                final byte[] dataForBob = "Hey Bob, it's Alice".getBytes(StandardCharsets.UTF_8);
+                send("bob", dataForBob);
             }
-        };
+        });
 
-        final Agent bob = new Agent("bob", bob2alice, alice2bob, null, null) {
+        env.add(new Agent("bob") {
             @Override
-            public void execute() throws Exception {
-                final byte[] pt = incoming.take();
-                print("Got '%s'", new String(pt));
+            public void task() throws Exception {
+                final byte[] dataFromAlice = receive("alice");
+                print("Got '%s'", new String(dataFromAlice, StandardCharsets.UTF_8));
             }
-        };
+        });
 
-        alice.start();
-        bob.start();
+        env.connect("alice", "bob");
+        env.start();
     }
 }
