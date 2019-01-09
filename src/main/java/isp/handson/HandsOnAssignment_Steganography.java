@@ -18,6 +18,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.BitSet;
 
+/**
+ * Steganography is the process of encoding information into an image by manipulating the bits that represent the colors
+ */
 public class HandsOnAssignment_Steganography {
     public static void main(String[] args) throws Exception, IOException, NoSuchAlgorithmException {
         final byte[] payload = "My message to you, Alice. Hello from Bob.".getBytes(StandardCharsets.UTF_8);

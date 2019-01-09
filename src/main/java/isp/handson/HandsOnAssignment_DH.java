@@ -12,17 +12,15 @@ import javax.crypto.spec.DHParameterSpec;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
+import java.security.*;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 
 /**
  * ("PK": A = g^a, "SK": a)
  */
 public class HandsOnAssignment_DH {
-    public static void main(String[] args) throws NoSuchAlgorithmException {
+    public static void main(String[] args) {
         final Environment env = new Environment();
 
         env.add(new Agent("alice") {
@@ -46,7 +44,6 @@ public class HandsOnAssignment_DH {
                     The key exchange is now finished, both entities have all the values they require
                  */
 
-
                 byte[] receivedPublicKey = receive("bob");
 
                 final X509EncodedKeySpec keySpec = new X509EncodedKeySpec(receivedPublicKey);
@@ -61,11 +58,12 @@ public class HandsOnAssignment_DH {
                 final byte[] sharedSecret = dh.generateSecret();
                 print("Shared secret: %s", hex(sharedSecret));
 
-                // By default the shared secret will be 32 bytes long,
-                // but our cipher requires keys of length 16 bytes
-                // IMPORTANT: It is better not to create the key directly from the shared secret,
-                // but derive it using key derivation function (will be covered later)
-                final SecretKeySpec aesKey = new SecretKeySpec(sharedSecret, 0, 16, "AES");
+                /*
+                    By default the shared secret will be 32 bytes long, but our cipher requires keys of length 16 bytes
+                    IMPORTANT: It is better not to create the key directly from the shared secret, but derive it using a
+                    key derivation function
+                 */
+                final SecretKeySpec aesKey = new SecretKeySpec(KeyDerivation.deriveKey(sharedSecret), "AES");
 
                 final Cipher aes = Cipher.getInstance("AES/GCM/NoPadding");
                 aes.init(Cipher.ENCRYPT_MODE, aesKey);
@@ -116,11 +114,12 @@ public class HandsOnAssignment_DH {
 
                 print("Shared secret: %s", hex(sharedSecret));
 
-                // By default the shared secret will be 32 bytes long,
-                // but our cipher requires keys of length 16 bytes
-                // IMPORTANT: It is better not to create the key directly from the shared secret,
-                // but derive it using key derivation function (will be covered later)
-                final SecretKeySpec aesKey = new SecretKeySpec(sharedSecret, 0, 16, "AES");
+                /*
+                    By default the shared secret will be 32 bytes long, but our cipher requires keys of length 16 bytes
+                    IMPORTANT: It is better not to create the key directly from the shared secret, but derive it using a
+                    key derivation function
+                 */
+                final SecretKeySpec aesKey = new SecretKeySpec(KeyDerivation.deriveKey(sharedSecret), "AES");
 
                 final Cipher aes = Cipher.getInstance("AES/GCM/NoPadding");
 
@@ -138,4 +137,6 @@ public class HandsOnAssignment_DH {
         env.connect("alice", "bob");
         env.start();
     }
+
+
 }

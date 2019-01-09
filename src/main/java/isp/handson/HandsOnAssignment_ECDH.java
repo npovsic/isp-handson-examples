@@ -58,7 +58,7 @@ public class HandsOnAssignment_ECDH {
                 final byte[] sharedSecret = dh.generateSecret();
                 print("Shared secret: %s", hex(sharedSecret));
 
-                final SecretKeySpec aesKey = new SecretKeySpec(sharedSecret, 0, 16, "AES");
+                final SecretKeySpec aesKey = new SecretKeySpec(KeyDerivation.deriveKey(sharedSecret), "AES");
 
                 final Cipher aes = Cipher.getInstance("AES/GCM/NoPadding");
 
@@ -111,7 +111,7 @@ public class HandsOnAssignment_ECDH {
                 final byte[] sharedSecret = dh.generateSecret();
                 print("Shared secret: %s", hex(sharedSecret));
 
-                final SecretKeySpec aesKey = new SecretKeySpec(sharedSecret, 0, 16, "AES");
+                final SecretKeySpec aesKey = new SecretKeySpec(KeyDerivation.deriveKey(sharedSecret), "AES");
 
                 final Cipher aes = Cipher.getInstance("AES/GCM/NoPadding");
 

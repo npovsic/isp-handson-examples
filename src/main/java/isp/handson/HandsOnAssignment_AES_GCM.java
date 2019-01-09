@@ -39,7 +39,7 @@ public class HandsOnAssignment_AES_GCM {
 
                 System.out.println("PT: " + Agent.hex(plaintext));
 
-                // Create a random IV, that is used by the parameter spec
+                // Create a random IV that is used by the parameter spec
                 byte[] iv = new byte[12];
 
                 // SecureRandom gives better random values than the Random class, use it to randomize the IV

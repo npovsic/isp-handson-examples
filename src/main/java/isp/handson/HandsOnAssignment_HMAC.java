@@ -97,14 +97,15 @@ public class HandsOnAssignment_HMAC {
             return false;
 
         int length = tag1.length;
-        if (tag2.length != length)
-            return false;
 
-        // This loop never terminates prematurely
+        if (tag2.length != length) return false;
+
         byte result = 0;
+
         for (int i = 0; i < length; i++) {
             result |= tag1[i] ^ tag2[i];
         }
+
         return result == 0;
     }
 
