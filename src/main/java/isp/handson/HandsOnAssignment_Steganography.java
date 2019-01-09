@@ -2,6 +2,7 @@ package isp.handson;
 
 import fri.isp.Agent;
 import fri.isp.Environment;
+import sun.security.util.BitArray;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -19,7 +20,7 @@ import java.util.BitSet;
 
 public class HandsOnAssignment_Steganography {
     public static void main(String[] args) throws Exception, IOException, NoSuchAlgorithmException {
-        final byte[] payload = "My message to you, Alice.".getBytes(StandardCharsets.UTF_8);
+        final byte[] payload = "My message to you, Alice. Hello from Bob.".getBytes(StandardCharsets.UTF_8);
 
         System.out.printf("Encode: %s%n", new String(payload, StandardCharsets.UTF_8));
 
@@ -64,8 +65,7 @@ public class HandsOnAssignment_Steganography {
                 .put(plaintext)
                 .array();
 
-        // Convert byte array to bit sequence
-        final BitSet bits = BitSet.valueOf(newPT);
+        BitArray bits = new BitArray(newPT.length * 8, newPT);
 
         // Encode the bits into image
         encode(bits, image);
@@ -79,12 +79,12 @@ public class HandsOnAssignment_Steganography {
         final BufferedImage image = loadImage(fileName);
 
         // Read all the least significant bits
-        final BitSet bits = decode(image);
+        final BitArray bits = decode(image);
 
         byte[] payload = bits.toByteArray();
 
         // Convert the bits to a byte array -> this is our decoded plaintext
-        return Arrays.copyOfRange(payload, 4, payload.length);
+        return payload;
     }
 
     public static void encryptAndEncode(final byte[] pt, final String inFile, final String outFile, final Key key) throws Exception {
@@ -102,15 +102,23 @@ public class HandsOnAssignment_Steganography {
         ImageIO.write(image, "png", new File(filePath));
     }
 
-    protected static void encode(final BitSet payload, final BufferedImage image) {
+    /**
+     * Encode the payload into the least significant bits of all colors of a single pixel
+     *
+     * @param payload
+     * @param image
+     */
+    protected static void encode(final BitArray payload, final BufferedImage image) {
         int minX = image.getMinX();
         int minY = image.getMinY();
 
         int width = image.getWidth();
         int height = image.getHeight();
 
-        for (int x = minX, indexOfCurrentBit = 0; x < width && indexOfCurrentBit < payload.size(); x++) {
-            for (int y = minY; y < height && indexOfCurrentBit < payload.size(); y++) {
+        String bitsString = "";
+
+        for (int x = minX, indexOfCurrentBit = 0; x < width && indexOfCurrentBit < payload.length() - 1; x++) {
+            for (int y = minY; y < height && indexOfCurrentBit < payload.length() - 1; y++) {
                 int pixelValue = image.getRGB(x, y);
 
                 Color color = new Color(pixelValue);
@@ -124,10 +132,13 @@ public class HandsOnAssignment_Steganography {
                 for (int i = 0; i < colors.length; i++) {
                     boolean currentBit = payload.get(indexOfCurrentBit);
 
+                    if (currentBit) bitsString += "1";
+                    else bitsString += "0";
+
                     colors[i] = setLeastSignificantBitForColor(colors[i], currentBit);
 
                     // We only need to process the image until all the payload values are encoded
-                    if (indexOfCurrentBit < payload.size()) indexOfCurrentBit++;
+                    if (indexOfCurrentBit < payload.length() - 1) indexOfCurrentBit++;
                 }
 
                 // Create a new color object with the modified values
@@ -137,10 +148,25 @@ public class HandsOnAssignment_Steganography {
                 image.setRGB(x, y, modifiedColor.getRGB());
             }
         }
+
+        System.out.println(bitsString);
     }
 
-    protected static BitSet decode(final BufferedImage image) {
-        final BitSet bits = new BitSet();
+    /**
+     * Retrieve the information encoded in the image
+     * First we need to get the length of the whole payload, which is encoded in the first 32 bits (int)
+     * Then we
+     *
+     * @param image
+     * @return
+     */
+    protected static BitArray decode(final BufferedImage image) {
+        // To get the payload size we need to process the first 4 bytes (32 bits) which gives us the length (int)
+        int payloadSize = 4 * 8;
+
+        BitArray bits = new BitArray(payloadSize);
+
+        String bitsString = "";
 
         int minX = image.getMinX();
         int minY = image.getMinY();
@@ -148,13 +174,10 @@ public class HandsOnAssignment_Steganography {
         int width = image.getWidth();
         int height = image.getHeight();
 
-        // To get the payload size we need to process the first 4 bytes (32 bits) which gives us the length int
-        int payloadSize = 4 * 8;
-
         boolean foundLength = false;
 
-        for (int x = minX, indexOfCurrentBit = 0; x < width && indexOfCurrentBit < payloadSize; x++) {
-            for (int y = minY; y < height && indexOfCurrentBit < payloadSize; y++) {
+        for (int x = minX, indexOfCurrentBit = 0; x < width && indexOfCurrentBit < payloadSize - 1; x++) {
+            for (int y = minY; y < height && indexOfCurrentBit < payloadSize - 1; y++) {
                 int pixelValue = image.getRGB(x, y);
 
                 Color color = new Color(pixelValue);
@@ -166,49 +189,71 @@ public class HandsOnAssignment_Steganography {
                 };
 
                 for (int singleColor : colors) {
+                    if (getLeastSignificantBitFromColor(singleColor)) bitsString += "1";
+                    else bitsString += "0";
+
                     bits.set(indexOfCurrentBit, getLeastSignificantBitFromColor(singleColor));
 
                     // We only need to process the image until all the payload values are encoded
-                    if (indexOfCurrentBit < payloadSize) indexOfCurrentBit++;
+                    if (indexOfCurrentBit < payloadSize - 1) indexOfCurrentBit++;
                     else if (!foundLength) {
                         // We processed the first 4 bytes, now we get the size
-                        payloadSize += (bitSetToInt(bits) * 8);
+                        payloadSize = bitsToInt(bits) * 8;
 
                         foundLength = true;
 
-                        indexOfCurrentBit++;
+                        indexOfCurrentBit = 0;
+
+                        bits = new BitArray(payloadSize);
                     }
                 }
             }
         }
 
+        System.out.println(bitsString);
+
         return bits;
     }
 
+    /**
+     * Encode the information into the least significant bit
+     *
+     * @param colorValue
+     * @param payloadBit
+     * @return
+     */
     protected static int setLeastSignificantBitForColor(int colorValue, boolean payloadBit) {
         if (payloadBit) {
-            colorValue = colorValue | 0x01; // sets LSB to 1
+            // 0x01 = 00000001 -> use bitwise OR with this value to only set the LSB to 1
+            colorValue = colorValue | 0x01;
         } else {
-            colorValue = colorValue & 0xfe; // sets LSB to 0
+            // 0xfe = 11111110 -> use bitwise AND with this value to only set the LSB to 0
+            colorValue = colorValue & 0xfe;
         }
 
         return colorValue;
     }
 
+    /**
+     * Returns the information encoded into the least significant bit
+     *
+     * @param colorValue
+     * @return
+     */
     protected static boolean getLeastSignificantBitFromColor(int colorValue) {
+        // 0x01 = 00000001 -> use bitwise AND with this value to check if the LSB is either 0 or 1
         return (colorValue & 0x01) != 0;
     }
 
-    public static int bitSetToInt(BitSet bitSet) {
+    public static int bitsToInt(BitArray bitSet) {
         int bitInteger = 0;
 
         for (int i = 0; i < 32; i++) {
             if (bitSet.get(i)) {
-                bitInteger |= (1 << i);
+                bitInteger |= (1 << (32 - i - 1));
             }
         }
 
-        // I don't get why I need to divide by 2^24, but this works
-        return (int) (bitInteger / (Math.pow(2, 24)));
+        return bitInteger;
     }
 }
