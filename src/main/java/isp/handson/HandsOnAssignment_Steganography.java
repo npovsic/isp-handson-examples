@@ -129,6 +129,7 @@ public class HandsOnAssignment_Steganography {
                         color.getBlue()
                 };
 
+                // This example uses all the color channels to encode the payload
                 for (int i = 0; i < colors.length; i++) {
                     boolean currentBit = payload.get(indexOfCurrentBit);
 
@@ -245,15 +246,26 @@ public class HandsOnAssignment_Steganography {
         return (colorValue & 0x01) != 0;
     }
 
+    /**
+     * This function converts a bit array with the length of 32 to an integer, which is comprised of 4 bytes or 32 bits
+     *
+     * We need to take care of which endian to choose -> here we need the Big Endian, where the most significant byte
+     * is in the lowest address (https://chortle.ccsu.edu/AssemblyTutorial/Chapter-15/ass15_3.html)
+     *
+     * @param bitArray
+     * @return
+     */
     public static int bitsToInt(BitArray bitArray) {
-        int bitInteger = 0;
+        int integerFromBits = 0;
 
         for (int i = 0; i < 32; i++) {
             if (bitArray.get(i)) {
-                bitInteger |= (1 << (32 - i - 1));
+                // This particular bit is on
+
+                integerFromBits = integerFromBits | (1 << (32 - i - 1));
             }
         }
 
-        return bitInteger;
+        return integerFromBits;
     }
 }
