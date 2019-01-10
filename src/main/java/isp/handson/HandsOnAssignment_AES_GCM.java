@@ -21,6 +21,8 @@ import java.security.SecureRandom;
  * Because this is authenticated encryption, the authentication tags (16 bytes) will be sent alongside the message
  * The decryption automatically checks the tag and throws an error if it fails
  *
+ * The size of the output ciphertext will be: input size + tag size + size of additional data
+ *
  * Authenticated encryption provides protection against padding oracle attacks (https://www.limited-entropy.com/padding-oracle-attacks/)
  */
 public class HandsOnAssignment_AES_GCM {
