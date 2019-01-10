@@ -186,10 +186,9 @@ public class Homework_2 {
             We need to take care of which endian to choose -> here we need the Big Endian, where the most significant byte
             is in the lowest address (https://chortle.ccsu.edu/AssemblyTutorial/Chapter-15/ass15_3.html)
 
-            To convert an int to a byte we need a byte array of 4 (since an int is 4 bytes or 32 bits) .The operation is
+            To convert an int to a byte we need a byte array of 4 (since an int is 4 bytes or 32 bits). The operation is
             very simple, just bit shift the selected octet to the first 8 bits and cast to byte. When casting from int to
             byte java will simply cut off all the octets after the first 8 bits and we are left with our byte (Downcasting).
-
          */
         padding[paddingSize - 4] = (byte) (hashedMessageLength >> 24);
         padding[paddingSize - 3] = (byte) (hashedMessageLength >> 16);

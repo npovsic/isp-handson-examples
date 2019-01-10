@@ -11,6 +11,9 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
 
+/**
+ * Provides non-repudiation of a plaintext message
+ */
 public class HandsOnAssignment_Signature {
     public static void main(String[] args) throws NoSuchAlgorithmException {
         final Environment env = new Environment();

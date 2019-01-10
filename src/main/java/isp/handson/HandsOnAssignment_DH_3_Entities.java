@@ -12,7 +12,9 @@ import java.security.KeyPairGenerator;
 import java.security.spec.X509EncodedKeySpec;
 
 /**
- * ("PK": A = g^a, "SK": a)
+ * This is an example of the Diffie-Hellman protocol with 3 parties
+ *
+ * (https://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html#DH3Ex)
  */
 public class HandsOnAssignment_DH_3_Entities {
     public static void main(String[] args) {

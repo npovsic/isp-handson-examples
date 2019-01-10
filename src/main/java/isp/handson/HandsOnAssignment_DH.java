@@ -17,7 +17,28 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 
 /**
- * ("PK": A = g^a, "SK": a)
+ * The basic idea behind Diffie-Hellman (very simplified):
+ *      (https://security.stackexchange.com/questions/45963/diffie-hellman-key-exchange-in-plain-english)
+ *
+ *      1. I come up with two prime numbers g and p and tell you what they are.
+ *
+ *      2. You then pick a secret number (a), but you don't tell anyone. Instead you compute g*a mod(p) and send that result
+ *      back to me. (We'll call that A since it came from a).
+ *
+ *      3. I do the same thing, but we'll call my secret number b and the computed number B. So I compute g*b mod(p) and
+ *      send you the result (called B)
+ *
+ *      4. Now, you take the number I sent you and do the exact same operation with it. So that's B*a mod(p).
+ *
+ *      5. I do the same operation with the result you sent me, so: A*b mod(p).
+ *
+ * The results:
+ *
+ *      (g*a mod (p))* b (mod p) = g*a*b mod(p) = SECRET
+ *      (g*b mod (p))* a (mod p) = g*b*a mod(p) = SECRET
+ *
+ * Public key: A = g^a
+ * Private key: a
  */
 public class HandsOnAssignment_DH {
     public static void main(String[] args) {

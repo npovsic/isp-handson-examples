@@ -18,6 +18,10 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.X509EncodedKeySpec;
 
+/**
+ * Same as the Diffie-Hellman example, except we are using elliptic curves to generate a key (256 bits)
+ * We get the same security by using 256 bits as we got in DH by using 2048 bits
+ */
 public class HandsOnAssignment_ECDH {
     public static void main(String[] args) throws NoSuchAlgorithmException {
         final Environment env = new Environment();
