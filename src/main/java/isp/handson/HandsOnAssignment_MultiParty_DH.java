@@ -16,7 +16,7 @@ import java.security.spec.X509EncodedKeySpec;
  *
  * (https://docs.oracle.com/javase/8/docs/technotes/guides/security/crypto/CryptoSpec.html#DH3Ex)
  */
-public class HandsOnAssignment_DH_3_Entities {
+public class HandsOnAssignment_MultiParty_DH {
     public static void main(String[] args) {
         final Environment env = new Environment();
 
