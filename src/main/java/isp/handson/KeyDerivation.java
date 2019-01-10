@@ -5,6 +5,7 @@ import fri.isp.Agent;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,10 +19,7 @@ import java.util.Arrays;
  * (https://www.javamex.com/tutorials/cryptography/pbe_salt.shtml)
  */
 public class KeyDerivation {
-    public static void createKeyFromPassword(byte[] sharedSecret) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        // Password from which the key will be derived
-        final String password = "password";
-
+    public static void createKeyFromPassword(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
         // Salt is supposed to be random
         final byte[] salt = "89fjh3409fdj390fk".getBytes(StandardCharsets.UTF_8);
 
@@ -34,6 +32,22 @@ public class KeyDerivation {
 
         System.out.printf("key = %s%n", Agent.hex(key.getEncoded()));
         System.out.printf("len(key) = %d bytes", key.getEncoded().length);
+    }
+
+    public static byte[] createKeyFromSharedSecret(byte[] sharedSecret) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        // Salt is supposed to be random
+        final byte[] salt = "89fjh3409fdj390fk".getBytes(StandardCharsets.UTF_8);
+
+        final SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+
+        // provide the password, salt, number of iterations and the number of required bits
+        final KeySpec specs = new PBEKeySpec((new String(sharedSecret)).toCharArray(), salt, 1000000, 128);
+
+        final SecretKey key = secretKeyFactory.generateSecret(specs);
+
+        final SecretKeySpec secretKeySpec = new SecretKeySpec(key.getEncoded(), "AES");
+
+        return secretKeySpec.getEncoded();
     }
 
     /**
